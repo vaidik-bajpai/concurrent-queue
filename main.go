@@ -1,16 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type ConcurrentQueue struct {
 	queue []int32
+	mu    sync.Mutex
 }
 
 func (q *ConcurrentQueue) Enqueue(item int32) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	q.queue = append(q.queue, item)
 }
 
 func (q *ConcurrentQueue) Dequeue() int32 {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
 	if len(q.queue) == 0 {
 		panic("[underflow condition] cannot dequeue from an empty queue")
 	}
@@ -21,6 +30,8 @@ func (q *ConcurrentQueue) Dequeue() int32 {
 }
 
 func (q *ConcurrentQueue) Size() int {
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	return len(q.queue)
 }
 
